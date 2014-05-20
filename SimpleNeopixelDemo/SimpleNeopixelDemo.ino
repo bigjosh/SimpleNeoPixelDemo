@@ -5,6 +5,14 @@
  More info at http://wp.josh.com/2014/05/11/ws2812-neopixels-made-easy/
 */
 
+//to fix "__builtin_avr_delay_cycles was not declared in this scope" error
+#ifndef __builtin_avr_delay_cycles
+void __builtin_avr_delay_cycles(unsigned long __n) {
+    while(__n)
+        __n--;
+}
+#endif
+
 // Change this to be at least as long as your pixel string (too long will work fine, just be a little slower)
 
 #define PIXELS 96*11  // Number of pixels in the string
