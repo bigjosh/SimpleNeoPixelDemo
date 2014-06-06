@@ -7,12 +7,12 @@
 
 // Change this to be at least as long as your pixel string (too long will work fine, just be a little slower)
 
-#define PIXELS 96*11  // Number of pixels in the string
+#define PIXELS 144  // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
 
-// These values are for digital pin 8 on an Arduino Yun or digital pin 12 on a DueMilinove/UNO
+// These values are for digital pin 8 on an Arduino Yun or digital pin 12 on a DueMilinove
 // Note that you could also include the DigitalWriteFast header file to not need to to this lookup.
 
 #define PIXEL_PORT  PORTB  // Port of the pin the pixels are connected to
@@ -20,13 +20,12 @@
 #define PIXEL_BIT   4      // Bit of the pin the pixels are connected to
 
 // These are the timing constraints taken mostly from the WS2812 datasheet 
-// These are chosen to be conservative to avoid problems rather than maximum throughput 
 
-#define T1H  900    // Width of a 1 bit in ns
+#define T1H  700    // Width of a 1 bit in ns
 #define T1L  600    // Width of a 1 bit in ns
 
-#define T0H  400    // Width of a 0 bit in ns
-#define T0L  900    // Width of a 0 bit in ns
+#define T0H  350    // Width of a 0 bit in ns
+#define T0L  800    // Width of a 0 bit in ns
 
 #define RES 6000    // Width of the low gap between bits to cause a frame to latch
 
@@ -80,6 +79,41 @@ void sendBit( bool bitVal ) {
 
     
 }  
+
+
+  
+void sendByteFast( unsigned char byte ) {
+    
+      
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+      sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
+                                                     // so send highest bit (bit #7 in an 8-bit byte since they start at 0)
+      byte <<= 1;                                    // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
+      
+    
+} 
+
 
   
 void sendByte( unsigned char byte ) {
@@ -314,14 +348,127 @@ void detonate( unsigned char r , unsigned char g , unsigned char b , unsigned in
     
 }
 
+void inline trigger() {
+    PORTD |= _BV(1);
+    PORTD &= ~_BV(1);   
+}
+
+
 void setup() {
     
   ledsetup();
   
+  pinMode( 2 , OUTPUT );
 }
 
 
 void loop() {
+   n ;
+  showColor(0,0,0);
+  return;
+  showColor(0xff,0xff,0xff);
+  showColor(0,0,0);
+  showColor(0xff,0xff,0xff);
+  showColor(0,0,0);
+  showColor(0xff,0xff,0xff);
+  showColor(0,0,0);
+  showColor(0xff,0xff,0xff);
+  return;  
+  
+  
+  cli();
+  
+//  sendPixel(0x0,0x0,0x0);
+  sendPixel(0xff,0xff,0xff);
+  sendPixel(0xff,0xff,0xff);
+  
+  trigger();
+  sendPixel(0xff,0xff,0xff);
+
+  sendPixel(0x0,0x0,0x0);
+  sendPixel(0x0,0x0,0x0);
+  
+  sei();
+
+  
+  show();
+  return;
+
+  
+  const unsigned char o = 8;
+  const unsigned char d = 4;
+  
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+      bitSet( PIXEL_PORT , PIXEL_BIT );
+          
+      DELAY_CYCLES( o );       // 1-bit width less  overhead  for the actual bit setting
+                                                     // Note that this delay could be longer and everything would still work
+      bitClear( PIXEL_PORT , PIXEL_BIT );
+
+      DELAY_CYCLES( d );       // 1-bit width less  overhead  for the actual bit setting
+  
+  sendPixel(0xff,0xff,0xff);
+  
+  sendPixel(0xff,00,0xff);  
+  show();
+  delay(1000);
+  return;
   
   // Some example procedures showing how to display to the pixels:
   colorWipe(255, 0, 0, 0); // Red
