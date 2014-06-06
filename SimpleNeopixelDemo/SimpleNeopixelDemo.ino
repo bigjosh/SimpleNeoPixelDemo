@@ -19,8 +19,8 @@
 #define PIXEL_DDR   DDRB   // Port of the pin the pixels are connected to
 #define PIXEL_BIT   4      // Bit of the pin the pixels are connected to
 
-// These are the timing constraints taken mostly from the WS2812 datasheet 
-// These are chosen to be conservative to avoid problems rather than maximum throughput 
+// These are the timing constraints taken mostly from the WS2812 datasheets 
+// These are chosen to be conservative and avoid problems rather than for maximum throughput 
 
 #define T1H  900    // Width of a 1 bit in ns
 #define T1L  600    // Width of a 1 bit in ns
