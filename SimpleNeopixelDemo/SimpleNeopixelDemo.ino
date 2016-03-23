@@ -12,7 +12,14 @@
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
 
-// These values are for digital pin 8 on an Arduino Yun or digital pin 12 on a DueMilinove/UNO
+// These values are for the pin that connects to the Data Input pin on the LED strip. They correspond to...
+
+// Arduino Yun:     Digital Pin 8
+// DueMilinove/UNO: Digital Pin 12
+// Arduino MeagL    PWM Pin 4
+
+// You'll need to look up the port/bit combination for other boards. 
+
 // Note that you could also include the DigitalWriteFast header file to not need to to this lookup.
 
 #define PIXEL_PORT  PORTB  // Port of the pin the pixels are connected to
@@ -43,7 +50,7 @@
 // Actually send a bit to the string. We must to drop to asm to enusre that the complier does
 // not reorder things and make it so the delay happens in the wrong place.
 
-void sendBit( bool bitVal ) {
+inline void sendBit( bool bitVal ) {
   
     if (  bitVal ) {				// 0 bit
       
@@ -98,7 +105,7 @@ void sendBit( bool bitVal ) {
 }  
 
   
-void sendByte( unsigned char byte ) {
+inline void sendByte( unsigned char byte ) {
     
     for( unsigned char bit = 0 ; bit < 8 ; bit++ ) {
       
@@ -128,7 +135,7 @@ void ledsetup() {
   
 }
 
-void sendPixel( unsigned char r, unsigned char g , unsigned char b )  {  
+inline void sendPixel( unsigned char r, unsigned char g , unsigned char b )  {  
   
   sendByte(g);          // Neopixel wants colors in green then red then blue order
   sendByte(r);
@@ -332,13 +339,13 @@ void detonate( unsigned char r , unsigned char g , unsigned char b , unsigned in
 
 void setup() {
     
-  ledsetup();
+  ledsetup();  
   
 }
 
 
 void loop() {
-  
+
   // Some example procedures showing how to display to the pixels:
   colorWipe(255, 0, 0, 0); // Red
   colorWipe(0, 255, 0, 0); // Green
