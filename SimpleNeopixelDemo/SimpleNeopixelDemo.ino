@@ -7,7 +7,7 @@
 
 // Change this to be at least as long as your pixel string (too long will work fine, just be a little slower)
 
-#define PIXELS 96*11  // Number of pixels in the string
+#define PIXELS 1420  // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
@@ -16,7 +16,7 @@
 
 // Arduino Yun:     Digital Pin 8
 // DueMilinove/UNO: Digital Pin 12
-// Arduino MeagL    PWM Pin 4
+// Arduino MeagL    PWM Pin 10
 
 // You'll need to look up the port/bit combination for other boards. 
 
@@ -61,12 +61,12 @@ inline void sendBit( bool bitVal ) {
 			".endr \n\t"
 			"cbi %[port], %[bit] \n\t"                              // Clear the output bit
 			".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
-			"nop \n\t"
+	//		"nop \n\t"
 			".endr \n\t"
 			::
 			[port]		"I" (_SFR_IO_ADDR(PIXEL_PORT)),
 			[bit]		"I" (PIXEL_BIT),
-			[onCycles]	"I" (NS_TO_CYCLES(T1H) - 2),		// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
+			[onCycles]	"I" (NS_TO_CYCLES(T1H) - 3),		// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
 			[offCycles] 	"I" (NS_TO_CYCLES(T1L) - 2)			// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
 
 		);
@@ -90,8 +90,8 @@ inline void sendBit( bool bitVal ) {
 			::
 			[port]		"I" (_SFR_IO_ADDR(PIXEL_PORT)),
 			[bit]		"I" (PIXEL_BIT),
-			[onCycles]	"I" (NS_TO_CYCLES(T0H) - 2),
-			[offCycles]	"I" (NS_TO_CYCLES(T0L) - 2)
+			[onCycles]	"I" (NS_TO_CYCLES(T0H) - 3),
+			[offCycles]	"I" (2)
 
 		);
       
@@ -202,6 +202,50 @@ void colorWipe(unsigned char r , unsigned char g, unsigned char b, unsigned  cha
     show();
     delay(wait);
   }
+}
+
+
+// Run a pixel down the string, repeating every SPACING pixels
+// Can not be bigger than 255
+
+#define SPACING 20
+
+void optimizedTheaterChase( unsigned char r , unsigned char g, unsigned char b, unsigned char wait ) {
+
+  unsigned char step = SPACING;   // One cycle will step the pixle though each spot in SPACING
+
+  while (step--) {
+  
+    unsigned char padding = step;
+
+    while (padding--) {   // Pad out the off pixels at the begining of the string
+
+      sendPixel( 0 , 0 , 0 );
+
+    }
+
+    
+
+    unsigned int loops = (PIXELS/20) + 1;    // How many times do we need to loop to make sure we full the string?
+
+    while (loops--) {   
+
+      sendPixel( r ,g , b );    // send the one on pixel
+
+      unsigned char gap = SPACING;
+
+      while (gap--) {
+
+              sendPixel( 0 , 0 , 0 );   // Fill in the gap to make room for next on pixel.
+
+      }
+      
+    }
+
+    show();
+    delay(wait);  
+  }
+
 }
 
 // Theatre-style crawling lights.
@@ -345,6 +389,12 @@ void setup() {
 
 
 void loop() {
+
+  optimizedTheaterChase(127, 127, 127, 0); // White
+  optimizedTheaterChase(127,   0,   0, 0); // Red
+  optimizedTheaterChase(  0,   0, 127, 0); // Blue
+
+  return;
 
   // Some example procedures showing how to display to the pixels:
   colorWipe(255, 0, 0, 0); // Red
