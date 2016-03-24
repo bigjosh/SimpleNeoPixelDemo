@@ -35,7 +35,7 @@
 #define T0H  400    // Width of a 0 bit in ns
 #define T0L  900    // Width of a 0 bit in ns
 
-#define RES 6000    // Width of the low gap between bits to cause a frame to latch
+#define RES 60000   // Width of the low gap between bits to cause a frame to latch
 
 // Here are some convience defines for using nanoseconds specs to generate actual CPU delays
 
