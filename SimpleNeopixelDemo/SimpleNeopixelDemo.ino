@@ -52,48 +52,48 @@
 
 inline void sendBit( bool bitVal ) {
   
-    if (  bitVal ) {				// 0 bit
+    if (  bitVal ) {        // 0 bit
       
-		asm volatile (
-			"sbi %[port], %[bit] \n\t"				// Set the output bit
-			".rept %[onCycles] \n\t"                                // Execute NOPs to delay exactly the specified number of cycles
-			"nop \n\t"
-			".endr \n\t"
-			"cbi %[port], %[bit] \n\t"                              // Clear the output bit
-			".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
-	//		"nop \n\t"
-			".endr \n\t"
-			::
-			[port]		"I" (_SFR_IO_ADDR(PIXEL_PORT)),
-			[bit]		"I" (PIXEL_BIT),
-			[onCycles]	"I" (NS_TO_CYCLES(T1H) - 3),		// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-			[offCycles] 	"I" (NS_TO_CYCLES(T1L) - 2)			// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
+    asm volatile (
+      "sbi %[port], %[bit] \n\t"        // Set the output bit
+      ".rept %[onCycles] \n\t"                                // Execute NOPs to delay exactly the specified number of cycles
+      "nop \n\t"
+      ".endr \n\t"
+      "cbi %[port], %[bit] \n\t"                              // Clear the output bit
+      ".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
+       "nop \n\t"
+      ".endr \n\t"
+      ::
+      [port]    "I" (_SFR_IO_ADDR(PIXEL_PORT)),
+      [bit]   "I" (PIXEL_BIT),
+      [onCycles]  "I" (NS_TO_CYCLES(T1H) - 3),    // 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
+      [offCycles]   "I" (1)     // Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
 
-		);
+    );
                                   
-    } else {					// 1 bit
+    } else {          // 1 bit
 
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
+    // **************************************************************************
+    // This line is really the only tight goldilocks timing in the whole program!
+    // **************************************************************************
 
 
-		asm volatile (
-			"sbi %[port], %[bit] \n\t"				// Set the output bit
-			".rept %[onCycles] \n\t"				// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-			"nop \n\t"                                              // Execute NOPs to delay exactly the specified number of cycles
-			".endr \n\t"
-			"cbi %[port], %[bit] \n\t"                              // Clear the output bit
-			".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
-			"nop \n\t"
-			".endr \n\t"
-			::
-			[port]		"I" (_SFR_IO_ADDR(PIXEL_PORT)),
-			[bit]		"I" (PIXEL_BIT),
-			[onCycles]	"I" (NS_TO_CYCLES(T0H) - 3),
-			[offCycles]	"I" (2)
+    asm volatile (
+      "sbi %[port], %[bit] \n\t"        // Set the output bit
+      ".rept %[onCycles] \n\t"        // Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
+      "nop \n\t"                                              // Execute NOPs to delay exactly the specified number of cycles
+      ".endr \n\t"
+      "cbi %[port], %[bit] \n\t"                              // Clear the output bit
+      ".rept %[offCycles] \n\t"                               // Execute NOPs to delay exactly the specified number of cycles
+      "nop \n\t"
+      ".endr \n\t"
+      ::
+      [port]    "I" (_SFR_IO_ADDR(PIXEL_PORT)),
+      [bit]   "I" (PIXEL_BIT),
+      [onCycles]  "I" (NS_TO_CYCLES(T0H) - 3),
+      [offCycles] "I" (2)
 
-		);
+    );
       
     }
     
@@ -147,7 +147,7 @@ inline void sendPixel( unsigned char r, unsigned char g , unsigned char b )  {
 // Just wait long enough without sending any bots to cause the pixels to latch and display the last sent frame
 
 void show() {
-	_delay_us( (RES / 1000UL) + 1);				// Round up since the delay must be _at_least_ this long (too short might not work, too long not a problem)
+  _delay_us( (RES / 1000UL) + 1);       // Round up since the delay must be _at_least_ this long (too short might not work, too long not a problem)
 }
 
 
@@ -215,6 +215,8 @@ void optimizedTheaterChase( unsigned char r , unsigned char g, unsigned char b, 
   unsigned char step = SPACING;   // One cycle will step the pixle though each spot in SPACING
 
   while (step--) {
+
+    cli();
   
     unsigned char padding = step;
 
@@ -226,7 +228,7 @@ void optimizedTheaterChase( unsigned char r , unsigned char g, unsigned char b, 
 
     
 
-    unsigned int loops = (PIXELS/20) + 1;    // How many times do we need to loop to make sure we full the string?
+    unsigned int loops = (PIXELS/SPACING) + 1;    // How many times do we need to loop to make sure we full the string?
 
     while (loops--) {   
 
@@ -242,8 +244,11 @@ void optimizedTheaterChase( unsigned char r , unsigned char g, unsigned char b, 
       
     }
 
+    sei();
+
     show();
     delay(wait);  
+    //delay(1000);
   }
 
 }
@@ -412,7 +417,6 @@ void loop() {
   return;
   
 }
-
 
 
 
