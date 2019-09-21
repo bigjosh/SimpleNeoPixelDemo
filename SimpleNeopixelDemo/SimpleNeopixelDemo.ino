@@ -35,6 +35,8 @@
 #define T0H  400    // Width of a 0 bit in ns
 #define T0L  900    // Width of a 0 bit in ns
 
+// The reset gap can be 6000 ns, but depending on the LED strip it may have to be increased
+// to values like 600000 ns. If it is too small, the pixels will show nothing most of the time.
 #define RES 6000    // Width of the low gap between bits to cause a frame to latch
 
 // Here are some convience defines for using nanoseconds specs to generate actual CPU delays
