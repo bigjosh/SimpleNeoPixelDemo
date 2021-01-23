@@ -363,7 +363,6 @@ void setup() {
 
 
 void loop() {
-   n ;
   showColor(0,0,0);
   return;
   showColor(0xff,0xff,0xff);
