@@ -218,7 +218,7 @@ void theaterChase( unsigned char r , unsigned char g, unsigned char b, unsigned 
   
   for (int j=0; j< 3 ; j++) {  
   
-    for (int q=0; q < THEATER_SPACING ; q++) {
+    for (int q=THEATER_SPACING ; q >= 0 ; q--) {
       
       unsigned int step=0;
       
@@ -229,7 +229,7 @@ void theaterChase( unsigned char r , unsigned char g, unsigned char b, unsigned 
         if (step==q) {
           
           sendPixel( r , g , b );
-          
+           
         } else {
           
           sendPixel( 0 , 0 , 0 );
@@ -367,8 +367,3 @@ void loop() {
   return;
   
 }
-
-
-
-
-
